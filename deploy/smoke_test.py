@@ -26,7 +26,7 @@ for attempt in range(60):
     try:
         assert json.loads(request("/api/health"))["ok"] is True
         break
-    except (URLError, TimeoutError, AssertionError):
+    except (URLError, TimeoutError, ConnectionError, json.JSONDecodeError, AssertionError):
         if attempt == 59:
             raise
         time.sleep(2)

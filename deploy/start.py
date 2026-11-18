@@ -49,7 +49,7 @@ def main():
                 with urlopen("http://127.0.0.1:8000/health", timeout=2) as response:
                     if json.load(response).get("ok") is True:
                         break
-            except (URLError, TimeoutError):
+            except (URLError, TimeoutError, ConnectionError):
                 pass
             if time.monotonic() >= deadline:
                 raise RuntimeError("FastAPI did not become healthy within 60 seconds.")
