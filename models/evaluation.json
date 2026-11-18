@@ -1,0 +1,82 @@
+{
+  "dataset_source": "Wisesight Sentiment Corpus v1.1 (CC0 1.0)",
+  "evaluation_scope": "คะแนนจากชุดทดสอบที่กันไว้ในชุดข้อมูลฝึกนี้",
+  "class_counts": {
+    "positive": 4776,
+    "negative": 6822,
+    "neutral": 14559
+  },
+  "duplicates_removed": 1,
+  "split_sizes": {
+    "train": 20925,
+    "test": 5232
+  },
+  "seed": 42,
+  "fold_count": 5,
+  "cv_comparison": [
+    {
+      "model": "Multinomial Naive Bayes",
+      "mean_macro_f1": 0.45736611274677796,
+      "std_macro_f1": 0.006555379858523035
+    },
+    {
+      "model": "Logistic Regression",
+      "mean_macro_f1": 0.6676947918115673,
+      "std_macro_f1": 0.007145273384182233
+    },
+    {
+      "model": "Linear SVM",
+      "mean_macro_f1": 0.6714820408661061,
+      "std_macro_f1": 0.00868820035272759
+    }
+  ],
+  "selected_model": "Linear SVM",
+  "held_out": {
+    "accuracy": 0.7295489296636085,
+    "macro_precision": 0.701103504986177,
+    "macro_recall": 0.6656677310473121,
+    "macro_f1": 0.6766071506258493
+  },
+  "per_class": {
+    "positive": {
+      "precision": 0.636085626911315,
+      "recall": 0.4356020942408377,
+      "f1": 0.5170913610938471,
+      "support": 955
+    },
+    "negative": {
+      "precision": 0.708976157082749,
+      "recall": 0.7406593406593407,
+      "f1": 0.7244715155858116,
+      "support": 1365
+    },
+    "neutral": {
+      "precision": 0.758248730964467,
+      "recall": 0.8207417582417582,
+      "f1": 0.7882585751978892,
+      "support": 2912
+    }
+  },
+  "label_order": [
+    "positive",
+    "negative",
+    "neutral"
+  ],
+  "confusion_matrix": [
+    [
+      416,
+      98,
+      441
+    ],
+    [
+      33,
+      1011,
+      321
+    ],
+    [
+      205,
+      317,
+      2390
+    ]
+  ]
+}

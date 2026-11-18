@@ -1,0 +1,10 @@
+.venv/
+.python/
+.setup-tools/
+.pythainlp-data/
+__pycache__/
+*.pyc
+*.log
+models/.train.lock
+frontend/node_modules/
+frontend/.next/
