@@ -8,9 +8,10 @@ RUN npm run build
 
 FROM python:3.11-slim-bookworm
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates libstdc++6 \
+    && apt-get install -y --no-install-recommends ca-certificates libstdc++6 libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=web-build /usr/local/bin/node /usr/local/bin/node
+RUN node --version
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUTF8=1 \
@@ -27,6 +28,7 @@ RUN python -m pip install --no-cache-dir -r requirements.txt
 COPY api.py predict.py preprocessing.py scraper.py train.py ./
 COPY data/ ./data/
 COPY models/ ./models/
+RUN python -c "from predict import load_model; print(load_model().training_report_['selected_model'])"
 COPY --from=web-build /web/.next/standalone/ ./frontend/
 COPY --from=web-build /web/.next/static/ ./frontend/.next/static/
 COPY --from=web-build /web/public/ ./frontend/public/
