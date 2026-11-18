@@ -2,7 +2,7 @@
 
 โครงงานวิเคราะห์ความรู้สึกจากความคิดเห็นภาษาไทยด้วย Next.js, React, Tailwind CSS และ FastAPI บน Python 3.11 ระบบจำแนกข้อความเป็น `positive` (เชิงบวก), `negative` (เชิงลบ) และ `neutral` (เป็นกลาง) การฝึกและทำนายทำงานในเครื่อง
 
-## Deploy บน Render
+
 
 [เปิดการ deploy บน Render](https://render.com/deploy?repo=https://github.com/Estio168/pantip-sentiment-analysis)
 
