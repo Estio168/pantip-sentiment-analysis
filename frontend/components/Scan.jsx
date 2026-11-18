@@ -15,7 +15,11 @@ class Boundary extends Component {
     return this.state.failed ? null : this.props.children;
   }
 }
-export default function Scan({ working = false }) {
+export default function Scan({
+  working = false,
+  expanded = false,
+  className = "",
+}) {
   const [motion, setMotion] = useState(false),
     [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false);
@@ -36,31 +40,29 @@ export default function Scan({ working = false }) {
     }, []);
   return (
     <section
-      className="relative flex min-h-[clamp(240px,64vw,360px)] flex-col overflow-hidden rounded-md border border-[#305156] bg-[#071318] xl:h-[clamp(320px,52dvh,400px)] xl:min-h-0 xl:self-start"
+      className={
+        "relative flex h-[340px] min-w-0 flex-col overflow-hidden rounded-card border border-[#305156] bg-ink sm:h-[440px] " +
+        (expanded
+          ? "console:h-auto console:min-h-[clamp(440px,calc(100dvh-180px),720px)] console:self-stretch "
+          : "console:h-[clamp(560px,72dvh,720px)] ") +
+        className
+      }
       aria-label="ภาพสแกนสมองสามมิติ"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-line bg-[#101e23] px-3 py-1.5">
-        <h2 className="flex items-center gap-2 text-sm font-bold">
+      <div className="flex items-center justify-between gap-2 border-b border-line bg-panel px-4 py-3 console:py-2">
+        <h2 className="flex items-center gap-2 text-xs font-bold tracking-[.08em] sm:text-sm">
           <Icon name="scan" className="h-4 w-4 text-aqua" />
-          ภาพสแกนสมอง
+          NEURAL SENTIMENT SCAN
         </h2>
         <span className="text-[10px] font-bold tracking-[.18em] text-aqua">
-          NEURAL SCAN
+          3D
         </span>
       </div>
       <div
         data-testid="brain-viewport"
         data-mode={ready ? "3d" : "poster"}
-        className="relative min-h-0 flex-1 overflow-hidden bg-scan bg-[size:32px_32px]"
+        className="relative min-h-0 flex-1 overflow-hidden bg-black"
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,88,97,.25),transparent_68%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute left-1/2 top-1/2 aspect-square h-[82%] max-w-[92%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#4e8990]/25 before:absolute before:inset-[7%] before:rounded-full before:border before:border-dashed before:border-[#4e8990]/25"
-        />
         <div
           aria-hidden="true"
           className="absolute inset-x-[3%] top-1/2 border-t border-aqua/10"
@@ -104,7 +106,7 @@ export default function Scan({ working = false }) {
           <span className="text-aqua">Y</span> ↑
         </div>
       </div>
-      <div className="flex items-center justify-between gap-2 border-t border-line bg-[#0c191e] px-3 py-1.5 text-xs text-muted">
+      <div className="flex items-center justify-between gap-2 border-t border-line bg-panel px-4 py-2.5 console:py-1.5 text-xs text-muted">
         <span className="flex items-center gap-2">
           <i className="h-1.5 w-1.5 rounded-full bg-aqua" />
           {working ? "กำลังวิเคราะห์" : "โหมดภาพรวม"}

@@ -53,18 +53,20 @@ export default function Analyzer() {
   }
   return (
     <>
-      <Title>วิเคราะห์ความคิดเห็น</Title>
-      <div className="grid min-w-0 gap-3">
+      <Title subtitle="เลือกแหล่งข้อมูล ตรวจตัวอย่างความคิดเห็น แล้วเริ่มวิเคราะห์ความรู้สึก">
+        วิเคราะห์ความคิดเห็น
+      </Title>
+      <div className="grid min-w-0 gap-4">
         <Panel>
           <SectionTitle icon="source">เลือกแหล่งข้อมูล</SectionTitle>
-          <div className="my-3 grid grid-cols-3 gap-1 rounded-lg border border-line bg-ink p-1">
+          <div className="my-4 grid grid-cols-3 gap-1 rounded-lg border border-line bg-ink p-1">
             {modes.map(([k, name, icon]) => (
               <button
                 key={k}
                 disabled={busy}
                 aria-pressed={mode === k}
                 className={
-                  "flex min-h-11 xl:min-h-9 items-center justify-center gap-2 rounded-md px-1 text-sm " +
+                  "flex min-h-11 items-center justify-center gap-2 rounded-md px-1 text-sm " +
                   focus +
                   " " +
                   (mode === k
@@ -102,12 +104,12 @@ export default function Analyzer() {
                 />
               </label>
             ) : mode === "csv" ? (
-              <label className="grid min-w-0 gap-2 text-sm">
-                ไฟล์ UTF-8 ที่มีคอลัมน์ comment_text
+              <label className="grid min-w-0 gap-3 rounded-lg border border-dashed border-line bg-ink/50 p-4 text-sm">
+                เลือกไฟล์ CSV · UTF-8 · คอลัมน์ comment_text
                 <input
                   className={
                     field +
-                    " file:mr-3 file:rounded file:border-0 file:bg-line file:px-3 file:text-white"
+                    " w-full file:mr-3 file:rounded file:border-0 file:bg-line file:px-3 file:py-1 file:text-white"
                   }
                   type="file"
                   disabled={busy}
@@ -119,12 +121,14 @@ export default function Analyzer() {
                 />
               </label>
             ) : (
-              <div>
-                <p className="text-sm text-muted">
-                  ชุดความคิดเห็นภาษาไทยสำหรับทดลองวิเคราะห์
-                </p>
-                <p className="mt-1 font-bold">pantip_comments.csv</p>
-              </div>
+              <label className="grid min-w-0 gap-2 text-sm">
+                ชุดความคิดเห็นภาษาไทยสำหรับทดลองวิเคราะห์
+                <select className={field} disabled={busy} defaultValue="demo">
+                  <option value="demo">
+                    pantip_comments.csv · ข้อมูลสาธิตในโครงการ
+                  </option>
+                </select>
+              </label>
             )}
             <button
               className={secondary}
@@ -143,6 +147,16 @@ export default function Analyzer() {
                     : "โหลดข้อมูลสาธิต"}
             </button>
           </form>
+          {busy && (
+            <p role="status" className="mt-4 text-sm text-aqua">
+              กำลังโหลดและตรวจสอบข้อมูล…
+            </p>
+          )}
+          {file && mode === "csv" && (
+            <p className="mt-3 text-sm text-muted [overflow-wrap:anywhere]">
+              ไฟล์ที่เลือก {file.name}
+            </p>
+          )}
           {err && <Notice>{err}</Notice>}
         </Panel>
         <Panel>
@@ -160,10 +174,10 @@ export default function Analyzer() {
               {current.note && (
                 <p className="my-2 text-sm text-muted">{current.note}</p>
               )}
-              <ol className="mt-3 divide-y divide-line border-y border-line">
+              <ol className="mt-4 max-h-80 overflow-y-auto overscroll-contain divide-y divide-line rounded-lg border border-line px-4">
                 {current.preview.map((s, i) => (
-                  <li key={i} className="flex gap-3 py-2 text-sm">
-                    <span className="text-muted tabular-nums">
+                  <li key={i} className="flex gap-3 py-3 text-sm">
+                    <span className="w-6 shrink-0 text-muted tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
@@ -174,11 +188,16 @@ export default function Analyzer() {
               </ol>
             </>
           ) : (
-            <p className="my-3 rounded-md border border-dashed border-line px-4 py-5 text-center text-sm text-muted">
+            <p className="my-4 rounded-lg border border-dashed border-line px-4 py-8 text-center text-sm text-muted">
               โหลดข้อมูลเพื่อดูตัวอย่างก่อนวิเคราะห์
             </p>
           )}
-          <div className="mt-3 flex justify-end">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-4">
+            <p className="text-sm text-muted">
+              {current
+                ? "ข้อมูลพร้อมแล้ว เริ่มวิเคราะห์ได้ทันที"
+                : "โหลดข้อมูลก่อนเริ่มวิเคราะห์"}
+            </p>
             <button
               className={primary}
               disabled={!current?.total || busy || !!err}

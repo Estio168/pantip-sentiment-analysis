@@ -2,6 +2,27 @@
 
 โครงงานวิเคราะห์ความรู้สึกจากความคิดเห็นภาษาไทยด้วย Next.js, React, Tailwind CSS และ FastAPI บน Python 3.11 ระบบจำแนกข้อความเป็น `positive` (เชิงบวก), `negative` (เชิงลบ) และ `neutral` (เป็นกลาง) การฝึกและทำนายทำงานในเครื่อง
 
+## Deploy บน Render
+
+[เปิดการ deploy บน Render](https://render.com/deploy?repo=https://github.com/Estio168/pantip-sentiment-analysis)
+
+เลือก repository นี้และใช้ Blueprint จาก `render.yaml` ระบบจะ build `Dockerfile` แล้วเปิด Next.js และ FastAPI ในคอนเทนเนอร์เดียว ใช้แผน Free ที่ Singapore ตามไฟล์ตั้งค่า แอปใช้โมเดลใน `models/` และชุดข้อมูลใน `data/` ได้ทันที โดยไม่ต้องตั้ง API key หรือ GitHub repository secrets
+
+Next.js รับการเชื่อมต่อที่ `0.0.0.0:$PORT` และส่งทุกเส้นทาง `/api/*` ไปยัง FastAPI ภายในคอนเทนเนอร์ที่ `127.0.0.1:8000` รองรับ Pantip, CSV, Demo, งานวิเคราะห์, ดาวน์โหลด CSV และฝึกโมเดล ใช้ API worker หนึ่งตัวและบริการหนึ่ง instance เพื่อรักษาสถานะงานวิเคราะห์ในหน่วยความจำ
+
+เมื่อ Render แสดงสถานะ Live เปิด URL `.onrender.com` แล้วลอง Demo CSV → วิเคราะห์ → Results → ดาวน์โหลด CSV ตรวจบริการได้ที่ `/api/health` GitHub Actions จะตรวจ build และรันการทดสอบนี้จาก Docker จริงทุกครั้งที่ push ไป `main`
+
+สำหรับรันด้วย Docker เอง
+
+```sh
+docker build -t pantip-sentiment .
+docker run --rm -p 10000:10000 pantip-sentiment
+```
+
+เปิด `http://localhost:10000` ไฟล์ที่อัปโหลด ผลวิเคราะห์ และโมเดลที่ฝึกใหม่ระหว่างสาธิตอยู่ในพื้นที่ชั่วคราวของบริการ เมื่อบริการเริ่มใหม่จะใช้โมเดลที่บรรจุไว้ใน image การฝึกชุดใหญ่ขึ้นอยู่กับหน่วยความจำของแพ็กเกจที่เลือก
+
+หลังพรีเซนต์สามารถลบบริการจาก Render Dashboard ได้ ส่วนการลบ repository ทำแยกที่ GitHub ตามต้องการ
+
 ## เริ่มใช้งานบน Windows
 
 ใช้ PowerShell สองหน้าต่างและเปิด [Pantip Sentiment](http://127.0.0.1:3000) หน้าเว็บเรียก FastAPI ผ่าน Next.js ทั้งสองบริการฟังเฉพาะบนเครื่องนี้

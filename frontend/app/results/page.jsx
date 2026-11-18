@@ -11,15 +11,11 @@ import {
   field,
   primary,
   secondary,
-  three,
+  EmptyState,
+  Metric,
 } from "../../components/UI";
 import { labels, colors, fmt } from "../../lib/api";
 const entries = Object.entries(labels);
-const fills = {
-  positive: "fill-pos",
-  negative: "fill-neg",
-  neutral: "fill-neu",
-};
 function CommentTable({ result }) {
   const [query, setQuery] = useState(""),
     [sentiment, setSentiment] = useState(""),
@@ -39,7 +35,7 @@ function CommentTable({ result }) {
   return (
     <Panel>
       <SectionTitle icon="message">ความคิดเห็นทั้งหมด</SectionTitle>
-      <div className="my-3 grid gap-3 sm:grid-cols-[1fr_minmax(180px,24%)]">
+      <div className="my-4 grid gap-4 sm:grid-cols-[1fr_minmax(180px,24%)]">
         <label className="grid gap-1 text-sm text-muted">
           ค้นหาข้อความ
           <input
@@ -88,7 +84,10 @@ function CommentTable({ result }) {
           </thead>
           <tbody>
             {rows.slice(page * limit, (page + 1) * limit).map((r) => (
-              <tr key={r.i} className="border-b border-line">
+              <tr
+                key={r.i}
+                className="border-b border-line transition-colors hover:bg-elevated"
+              >
                 <td className="p-2 align-top text-muted tabular-nums">
                   {fmt(r.i + 1)}
                 </td>
@@ -107,9 +106,7 @@ function CommentTable({ result }) {
         </table>
       </div>
       {!rows.length && (
-        <p className="py-5 text-center text-muted">
-          ไม่พบความคิดเห็นที่ตรงกับตัวกรอง
-        </p>
+        <p className="py-5 text-center text-muted">ไม่พบความคิดเห็นที่ตรงกับตัวกรอง</p>
       )}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
         <span>
@@ -145,69 +142,119 @@ export default function Results() {
   if (!result)
     return (
       <>
-        <Title>ผลการวิเคราะห์</Title>
-        <Panel className="mx-auto max-w-2xl">
-          <SectionTitle icon="results">ยังไม่มีผลการวิเคราะห์</SectionTitle>
-          <p className="my-5 text-muted">
-            เลือกแหล่งความคิดเห็นและวิเคราะห์เพื่อดูผลที่นี่
-          </p>
-          <Action />
-        </Panel>
+        <Title subtitle="ดูสัดส่วนความรู้สึก สำรวจความคิดเห็น และดาวน์โหลดผลวิเคราะห์">
+          ผลการวิเคราะห์
+        </Title>
+        <EmptyState
+          title="ยังไม่มีผลการวิเคราะห์"
+          action={<Action>เริ่มวิเคราะห์ความคิดเห็น</Action>}
+        >
+          เลือกข้อมูลจากกระทู้ Pantip ไฟล์ CSV หรือข้อมูลสาธิต แล้วเริ่มวิเคราะห์เพื่อดูผลสรุปที่นี่
+        </EmptyState>
       </>
     );
   const total = result.labels.length;
   let offset = 0;
   return (
     <div className="motion-safe:animate-appear">
-      <Title info="ผลการวิเคราะห์">{result.source.name}</Title>
-      <div className={three}>
-        <Panel>
-          <SectionTitle icon="source">ข้อมูลที่วิเคราะห์</SectionTitle>
-          <p className="mt-4 text-sm text-muted">{result.source.kind}</p>
-          <strong className="mt-2 block text-[2.25rem] leading-tight tabular-nums">
-            {fmt(total)}
-          </strong>
-          <p className="mt-2 text-sm text-muted">ความคิดเห็น</p>
-          {result.source.note && (
-            <p className="mt-4 text-sm text-muted">{result.source.note}</p>
-          )}
-        </Panel>
-        <Panel className="bg-[#0c2025]">
+      <Title subtitle={result.source.name} info={result.source.kind}>
+        ผลการวิเคราะห์
+      </Title>
+      <div
+        data-testid="results-metrics"
+        className="mb-4 grid items-stretch gap-4 sm:grid-cols-3"
+      >
+        <Metric
+          numeric
+          icon="message"
+          label="ความคิดเห็นที่วิเคราะห์"
+          value={fmt(total)}
+          detail="ประมวลผลครบทุกความคิดเห็น"
+        />
+        <Metric
+          icon="model"
+          label="โมเดลที่ใช้วิเคราะห์"
+          value={result.model}
+          detail="ผลจากโมเดลที่บันทึกไว้"
+        />
+        <Metric
+          icon="source"
+          label="แหล่งข้อมูล"
+          value={result.source.kind}
+          detail={result.source.note || "สำรวจความคิดเห็นในตารางด้านล่าง"}
+        />
+      </div>
+      <div
+        data-testid="results-analysis"
+        className="grid items-stretch gap-4 lg:grid-cols-3"
+      >
+        <Panel className="flex h-full flex-col lg:col-span-2">
           <SectionTitle icon="results">สัดส่วนความรู้สึก</SectionTitle>
-          <div className="mb-3 mt-3">
+          <div className="mx-auto my-4 w-full max-w-[240px]">
             <svg
               role="img"
               aria-label="แผนภูมิสัดส่วนความรู้สึก"
-              viewBox="0 0 100 12"
-              preserveAspectRatio="none"
-              className="h-12 w-full overflow-hidden rounded-sm"
+              viewBox="0 0 120 120"
+              className="w-full"
             >
-              {entries.map(([k, l]) => {
-                const x = offset,
-                  w = (100 * counts[k]) / total;
-                offset += w;
+              <circle
+                cx="60"
+                cy="60"
+                r="46"
+                fill="none"
+                className="stroke-line"
+                strokeWidth="12"
+              />
+              {entries.map(([key, label]) => {
+                const start = offset;
+                const percent = (counts[key] / total) * 100;
+                offset += percent;
                 return (
-                  <rect
-                    key={k}
-                    className={fills[k]}
-                    x={x}
-                    width={w}
-                    height="12"
+                  <circle
+                    key={key}
+                    cx="60"
+                    cy="60"
+                    r="46"
+                    fill="none"
+                    className={
+                      {
+                        positive: "stroke-pos",
+                        negative: "stroke-neg",
+                        neutral: "stroke-neu",
+                      }[key]
+                    }
+                    strokeWidth="12"
+                    pathLength="100"
+                    strokeDasharray={`${percent} ${100 - percent}`}
+                    strokeDashoffset={-start}
+                    transform="rotate(-90 60 60)"
                   >
                     <title>
-                      {l} {counts[k]}
+                      {label} {fmt(counts[key])} ความคิดเห็น ({percent.toFixed(1)}
+                      %)
                     </title>
-                  </rect>
+                  </circle>
                 );
               })}
+              <text
+                x="60"
+                y="58"
+                textAnchor="middle"
+                className="fill-primary text-[18px] font-bold"
+              >
+                {fmt(total)}
+              </text>
+              <text
+                x="60"
+                y="71"
+                textAnchor="middle"
+                className="fill-muted text-[7px]"
+              >
+                ความคิดเห็นทั้งหมด
+              </text>
             </svg>
-            <div className="mt-2 flex justify-between text-xs text-muted tabular-nums">
-              <span>0%</span>
-              <span>50%</span>
-              <span>100%</span>
-            </div>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-auto grid grid-cols-3 gap-3 pt-4">
             {entries.map(([k, l]) => (
               <div key={k}>
                 <span className="flex items-center gap-2 text-sm text-muted">
@@ -221,35 +268,38 @@ export default function Results() {
             ))}
           </div>
         </Panel>
-        <Panel>
+        <Panel className="flex h-full flex-col">
           <SectionTitle icon="model">{result.model}</SectionTitle>
-          <div className="my-3 divide-y divide-line">
+          <dl className="my-4 grid flex-1 content-center divide-y divide-line">
             {entries.map(([k, l]) => (
               <div
-                className="flex items-center justify-between py-2 text-sm"
+                className="flex flex-wrap items-center justify-between gap-2 py-4 text-sm"
                 key={k}
               >
-                <span>{l}</span>
-                <b className="tabular-nums">
+                <dt className="flex items-center gap-2">
+                  <i className={"h-2 w-2 rounded-sm " + colors[k]} />
+                  {l}
+                </dt>
+                <dd className="text-xl font-bold tabular-nums">
                   {fmt(counts[k])}{" "}
-                  <span className="font-normal text-muted">
+                  <span className="text-sm font-normal text-muted">
                     ({((100 * counts[k]) / total).toFixed(1)}%)
                   </span>
-                </b>
+                </dd>
               </div>
             ))}
-          </div>
+          </dl>
           <a
             download
             href={"/api/jobs/" + result.id + "/csv"}
-            className={primary}
+            className={primary + " mt-auto w-full"}
           >
             <Icon name="download" className="h-4 w-4" />
             ดาวน์โหลดผลทั้งหมด CSV
           </a>
         </Panel>
       </div>
-      <div className="mt-3">
+      <div data-testid="results-comments" className="mt-4">
         <Reveal>
           <CommentTable result={result} />
         </Reveal>

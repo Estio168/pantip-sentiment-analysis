@@ -14,8 +14,14 @@ export const metadata = {
 };
 export default function Layout({ children }) {
   return (
-    <html lang="th" className={seed.variable + " lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:w-0"}>
-      <body className="min-h-screen bg-ink font-sans text-[#e3eeee] antialiased selection:bg-aqua selection:text-ink">
+    <html
+      lang="th"
+      className={
+        seed.variable +
+        " lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:w-0"
+      }
+    >
+      <body className="min-h-screen bg-ink font-sans text-primary antialiased selection:bg-aqua selection:text-ink">
         <ConsoleProvider>{children}</ConsoleProvider>
       </body>
     </html>

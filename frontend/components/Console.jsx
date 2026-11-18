@@ -1,5 +1,12 @@
 "use client";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { api } from "../lib/api";
@@ -33,20 +40,20 @@ function Header() {
         onClick={() => setOpen(false)}
         aria-current={i === index ? "page" : undefined}
         className={
-          "relative flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 text-sm transition-colors hover:bg-aqua/5 hover:text-aqua md:min-h-10 motion-reduce:transition-none " +
+          "relative flex min-h-11 items-center gap-2 whitespace-nowrap rounded-xl px-3 text-sm transition-colors hover:bg-aqua/5 hover:text-aqua motion-reduce:transition-none " +
           focus +
           " " +
           (mobile ? "justify-start " : "justify-center ") +
-          (i === index ? "bg-aqua/[.07] font-bold text-aqua shadow-[inset_0_-2px_0_currentColor]" : "text-muted")
+          (i === index ? "font-bold text-aqua" : "text-muted")
         }
       >
-        <Icon name={icon} className="h-4 w-4 md:h-3.5 md:w-3.5" />
+        <Icon name={icon} className="h-4 w-4" />
         {title}
       </Link>
     ));
   }
   return (
-    <header className="sticky top-0 z-40 bg-ink/90 py-1.5 backdrop-blur-xl md:py-[5px]">
+    <header className="sticky top-0 z-40 bg-ink px-4 pt-2">
       <div
         onKeyDown={(e) => {
           if (e.key === "Escape" && open) {
@@ -54,11 +61,11 @@ function Header() {
             toggle.current.focus();
           }
         }}
-        className="relative mx-auto flex w-fit max-w-[94%] justify-center rounded-xl border border-line bg-[#101b20]/95 p-1 shadow-lg md:p-0.5"
+        className="relative mx-auto flex w-fit max-w-full items-center justify-center rounded-[22px] border border-line bg-[#10161a] p-1.5 md:px-3"
       >
         <nav
           aria-label="เมนูหลัก"
-          className="hidden w-fit items-center gap-0.5 rounded-lg md:flex"
+          className="hidden w-fit items-center gap-1 md:flex"
         >
           {links(false)}
         </nav>
@@ -81,7 +88,7 @@ function Header() {
           hidden={!open}
           className={
             (open ? "grid " : "hidden ") +
-            "absolute left-1/2 top-[calc(100%+6px)] w-56 max-w-[94vw] -translate-x-1/2 rounded-lg border border-line bg-panel p-2 shadow-xl md:hidden"
+            "absolute left-1/2 top-[calc(100%+8px)] w-64 max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-xl border border-line bg-[#10161a] p-2 shadow-xl md:hidden"
           }
         >
           {links(true)}
@@ -98,11 +105,21 @@ export function ConsoleProvider({ children }) {
     [modelError, setModelError] = useState("");
   const router = useRouter(),
     pending = useRef(null);
-  useEffect(() => {
-    api("/model")
-      .then(setReport)
-      .catch((e) => setModelError(e.message));
+  const [modelLoading, setModelLoading] = useState(true);
+  const refreshModel = useCallback(async () => {
+    setModelLoading(true);
+    setModelError("");
+    try {
+      setReport(await api("/model"));
+    } catch (e) {
+      setModelError(e.message);
+    } finally {
+      setModelLoading(false);
+    }
   }, []);
+  useEffect(() => {
+    refreshModel();
+  }, [refreshModel]);
   function begin() {
     if (!source?.total) return;
     if (pending.current?.source.id !== source.id) {
@@ -126,13 +143,24 @@ export function ConsoleProvider({ children }) {
         report,
         setReport,
         modelError,
+        modelLoading,
+        refreshModel,
         begin,
         finish,
       }}
     >
+      <a
+        href="#main-content"
+        className="sr-only z-50 rounded bg-aqua p-3 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-2"
+      >
+        ข้ามไปเนื้อหาหลัก
+      </a>
       <Header />
-      <main className="px-4 pb-4 pt-2 sm:px-6">
-        <div className="mx-auto w-full max-w-screen-xl">{children}</div>
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-dashboard px-4 pb-3 pt-3 sm:px-6"
+      >
+        <div className="min-w-0">{children}</div>
       </main>
     </Context.Provider>
   );

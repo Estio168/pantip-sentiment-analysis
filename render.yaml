@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: pantip-sentiment-analysis
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    numInstances: 1
+    envVars:
+      - key: PORT
+        value: "10000"

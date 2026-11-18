@@ -1,0 +1,14 @@
+.git
+.venv
+.python
+.setup-tools
+.pythainlp-data
+**/__pycache__
+**/*.pyc
+**/*.log
+**/.env
+**/.env.*
+frontend/node_modules
+frontend/.next
+screenshots
+models/.train.lock

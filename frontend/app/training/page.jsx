@@ -9,6 +9,7 @@ import {
   Reveal,
   field,
   primary,
+  secondary,
 } from "../../components/UI";
 import { api, fmt, labels } from "../../lib/api";
 const metricNames = {
@@ -18,7 +19,8 @@ const metricNames = {
   macro_f1: "Macro F1",
 };
 export default function Training() {
-  const { report, setReport, modelError } = useConsole(),
+  const { report, setReport, modelError, modelLoading, refreshModel } =
+      useConsole(),
     [mode, setMode] = useState("bundled"),
     [file, setFile] = useState(null),
     [busy, setBusy] = useState(false),
@@ -42,11 +44,13 @@ export default function Training() {
   }
   return (
     <>
-      <Title>ฝึกโมเดล</Title>
-      <div className="grid gap-3 lg:grid-cols-2">
+      <Title subtitle="เลือกชุดข้อมูล ฝึกเปรียบเทียบโมเดล และตรวจผลประเมินจากชุดทดสอบ">
+        ฝึกโมเดล
+      </Title>
+      <div className="grid gap-4 lg:grid-cols-2">
         <Panel>
           <SectionTitle icon="source">ชุดข้อมูลสำหรับฝึก</SectionTitle>
-          <label className="my-3 grid gap-2 text-sm">
+          <label className="my-4 grid gap-2 text-sm">
             แหล่งข้อมูล
             <select
               className={field}
@@ -63,13 +67,30 @@ export default function Training() {
               aria-label="ไฟล์ฝึก CSV"
               type="file"
               accept=".csv"
-              className={field + " mb-3 block w-full"}
+              disabled={busy}
+              className={field + " mb-4 block w-full"}
               onChange={(e) => setFile(e.target.files[0])}
             />
           )}
-          <p className="mb-3 text-sm text-muted">
-            เมื่อฝึกสำเร็จ
-            ระบบจะบันทึกโมเดลที่ได้คะแนนดีที่สุดเป็นโมเดลที่ใช้งาน
+          {mode === "bundled" && report && (
+            <div className="mb-4 rounded-lg border border-line bg-ink/50 p-4">
+              <p className="text-sm text-muted [overflow-wrap:anywhere]">
+                {report.dataset_source}
+              </p>
+              <dl className="mt-3 grid grid-cols-3 gap-3">
+                {Object.entries(report.class_counts).map(([key, count]) => (
+                  <div key={key}>
+                    <dt className="text-sm text-muted">{labels[key]}</dt>
+                    <dd className="mt-1 text-lg font-bold tabular-nums">
+                      {fmt(count)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+          <p className="mb-4 text-sm leading-relaxed text-muted">
+            เมื่อฝึกสำเร็จ ระบบจะบันทึกโมเดลที่ได้คะแนนดีที่สุดเป็นโมเดลที่ใช้งาน
           </p>
           <button
             className={primary}
@@ -89,9 +110,17 @@ export default function Training() {
           <SectionTitle icon="model">โมเดลที่ใช้งาน</SectionTitle>
           {report ? (
             <>
-              <p className="my-3 text-2xl font-bold">{report.selected_model}</p>
+              <p
+                role="status"
+                className="mt-4 w-fit rounded-md bg-aqua/10 px-3 py-1 text-sm text-aqua"
+              >
+                {busy ? "กำลังฝึกและประเมินผล" : "พร้อมวิเคราะห์"}
+              </p>
+              <p className="my-4 text-metric font-bold">
+                {report.selected_model}
+              </p>
               <p className="text-sm text-muted">{report.dataset_source}</p>
-              <div className="mt-3 flex gap-5 border-t border-line pt-3">
+              <div className="mt-4 flex flex-wrap gap-4 border-t border-line pt-3">
                 {Object.entries(report.split_sizes).map(([k, v]) => (
                   <div key={k}>
                     <p className="text-xs text-muted">
@@ -102,15 +131,31 @@ export default function Training() {
                 ))}
               </div>
             </>
+          ) : modelError ? (
+            <div>
+              <Notice>{modelError}</Notice>
+              <button
+                className={secondary}
+                disabled={modelLoading}
+                onClick={refreshModel}
+              >
+                {modelLoading ? "กำลังเชื่อมต่อ…" : "ลองเชื่อมต่ออีกครั้ง"}
+              </button>
+            </div>
           ) : (
-            <p className="mt-3">{modelError || "กำลังโหลดรายงาน"}</p>
+            <p
+              role="status"
+              className="mt-4 rounded-lg bg-ink/50 p-4 text-sm text-muted"
+            >
+              กำลังโหลดข้อมูลโมเดลและผลประเมิน…
+            </p>
           )}
         </Panel>
       </div>
       {report && (
-        <div className="mt-3 grid gap-3">
+        <div className="mt-4 grid gap-4">
           <Reveal>
-            <div className="grid gap-3 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
               <Panel>
                 <SectionTitle icon="results">
                   เปรียบเทียบ {report.fold_count}-fold CV
@@ -150,41 +195,43 @@ export default function Training() {
               <p className="my-3 text-sm text-muted">
                 แถวแสดงความรู้สึกจริง คอลัมน์แสดงผลที่โมเดลทำนาย
               </p>
-              <table className="w-full table-fixed text-center text-sm tabular-nums">
-                <thead>
-                  <tr>
-                    <th className="p-2 text-left">จริง / ทำนาย</th>
-                    {report.label_order.map((k) => (
-                      <th key={k}>{labels[k]}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.confusion_matrix.map((row, i) => (
-                    <tr key={i} className="border-t border-line">
-                      <th className="px-2 py-2 text-left">
-                        {labels[report.label_order[i]]}
-                      </th>
-                      {row.map((v, j) => (
-                        <td
-                          key={j}
-                          className={
-                            i === j ? "bg-aqua/10 font-bold text-aqua" : ""
-                          }
-                        >
-                          {fmt(v)}
-                        </td>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[360px] table-fixed text-center text-sm tabular-nums">
+                  <thead>
+                    <tr>
+                      <th className="p-2 text-left">จริง / ทำนาย</th>
+                      {report.label_order.map((k) => (
+                        <th key={k}>{labels[k]}</th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {report.confusion_matrix.map((row, i) => (
+                      <tr key={i} className="border-t border-line">
+                        <th className="px-2 py-2 text-left">
+                          {labels[report.label_order[i]]}
+                        </th>
+                        {row.map((v, j) => (
+                          <td
+                            key={j}
+                            className={
+                              i === j ? "bg-aqua/10 font-bold text-aqua" : ""
+                            }
+                          >
+                            {fmt(v)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </Panel>
           </Reveal>
           <Reveal>
             <Panel>
               <SectionTitle icon="results">ผลประเมินรายความรู้สึก</SectionTitle>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 {report.label_order.map((k) => (
                   <div className="border-l border-line pl-3" key={k}>
                     <h3 className="mb-2 font-bold">{labels[k]}</h3>

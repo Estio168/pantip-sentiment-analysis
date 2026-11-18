@@ -98,7 +98,12 @@ export default function Processing() {
     );
   return (
     <>
-      <Title info={job.source.kind}>กำลังวิเคราะห์ความคิดเห็น</Title>
+      <Title
+        subtitle="ติดตามขั้นตอนเตรียมข้อมูลและจำนวนความคิดเห็นที่ทำนายเสร็จแล้ว"
+        info={job.source.kind}
+      >
+        กำลังวิเคราะห์ความคิดเห็น
+      </Title>
       <div className={three}>
         <Panel>
           <SectionTitle icon="source">เตรียมข้อมูล</SectionTitle>
